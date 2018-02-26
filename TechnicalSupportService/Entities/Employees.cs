@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using TechnicalSupportService.Enums;
@@ -18,6 +19,34 @@ namespace TechnicalSupportService.Entities
         {
             //TODO read DB History values
             //set _emplDict
+
+            for (int i = 0; i < 10; i++)
+            {
+                EmployeeModel employee = new EmployeeModel
+                {
+                    ID = new Guid().ToString(),
+                    Status = EmployeeStatusType.Free,
+                    Type = EmployeeType.Simple
+                };
+
+                _emplDict.TryAdd(employee.ID, employee);
+            }
+
+            EmployeeModel employeeMng = new EmployeeModel
+            {
+                ID = new Guid().ToString(),
+                Status = EmployeeStatusType.Free,
+                Type = EmployeeType.Simple
+            };
+            _emplDict.TryAdd(employeeMng.ID, employeeMng);
+
+            EmployeeModel employeeDrct = new EmployeeModel
+            {
+                ID = new Guid().ToString(),
+                Status = EmployeeStatusType.Free,
+                Type = EmployeeType.Simple
+            };
+            _emplDict.TryAdd(employeeDrct.ID, employeeDrct);
 
         }
 

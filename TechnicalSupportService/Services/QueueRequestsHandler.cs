@@ -30,23 +30,23 @@ namespace TechnicalSupportService.Services
         {
             while (Requests.Instance.CountRequest > 0)
             {
-                Task.Run(async () => await DoOperationBody(TdMin, EmployeeType.Director));
-                Task.Run(async () => await DoOperationBody(TmMin, EmployeeType.Manager));
-                Task.Run(async () => await DoOperationBody(null, EmployeeType.Simple));
+                DoOperationBody(TdMin, EmployeeType.Director);
+                DoOperationBody(TmMin, EmployeeType.Manager);
+                DoOperationBody(null, EmployeeType.Simple);
             }
             Interlocked.Decrement(ref _work);
         }
 
-        private Task DoOperationBody(int? maxStoreMin, EmployeeType employeeType)
+        private void DoOperationBody(int? maxStoreMin, EmployeeType employeeType)
         {
-            var tdRequestModel = Requests.Instance.GetMaxStoredRequestModel(maxStoreMin);
-            if (tdRequestModel == null) return null;
-            if (Employees.Instance.CountFreeEmployees <= 0) return null;
+            var tdRequestModel = Requests.Instance.GetStoredRequestModel(maxStoreMin);
+            if (tdRequestModel == null) return;
+            if (Employees.Instance.CountFreeEmployees <= 0) return;
 
             var employee = Employees.Instance.GetFreeEmployee(employeeType);
-            if (employee == null) return null;
+            if (employee == null) return;
 
-            if (!Employees.Instance.ChangeStatus(employee.ID, EmployeeStatusType.Work)) return null;
+            if (!Employees.Instance.ChangeStatus(employee.ID, EmployeeStatusType.Work)) return;
             if (Requests.Instance.ChangeStatus(tdRequestModel.ID, RequestStatusType.Involved))
             {
                 Requests.Instance.RunRequest(employee.ID, tdRequestModel.ID);
@@ -55,7 +55,7 @@ namespace TechnicalSupportService.Services
             {
                 Employees.Instance.ChangeStatus(employee.ID, EmployeeStatusType.Free);
             }
-            return null;
+            return;
         }
     }
 }

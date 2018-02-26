@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading;
@@ -106,18 +108,25 @@ namespace TechnicalSupportService.Entities
             return requestModel;
         }
 
-        public RequestModel GetMaxStoredRequestModel(int? checkMaxStore)
+        public RequestModel GetStoredRequestModel(int? checkMaxStore)
         {
-            var maxStoreTime = _requestDict.Where(w => w.Value.Status == RequestStatusType.NotProcessed)
-                .Max(m => m.Value.StoreTime);
+            RequestModel storedRequest;
+            if (checkMaxStore.HasValue)
+            {
+                var now = DateTime.Now;
+                storedRequest = _requestDict
+                    .Where(w => w.Value.Status == RequestStatusType.NotProcessed &&
+                                now.Subtract(w.Value.StoreTime).Minutes >= checkMaxStore).Select(s => s.Value)
+                    .FirstOrDefault();
+            }
+            else
+            {
+                storedRequest = _requestDict
+                    .Where(w => w.Value.Status == RequestStatusType.NotProcessed ).Select(s => s.Value)
+                    .LastOrDefault();
+            }
 
-            var minSubstract = DateTime.Now.Subtract(maxStoreTime).Minutes;
-            if (checkMaxStore.HasValue && minSubstract < checkMaxStore)
-                return null;
-
-            return _requestDict
-                .Where(w => w.Value.Status == RequestStatusType.NotProcessed && w.Value.StoreTime == maxStoreTime)
-                .Select(s => s.Value).FirstOrDefault();
+            return storedRequest;
         }
 
         public void RunRequest(string employeeID, string requestID)
