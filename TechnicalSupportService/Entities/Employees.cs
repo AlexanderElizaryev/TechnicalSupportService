@@ -24,7 +24,7 @@ namespace TechnicalSupportService.Entities
             {
                 EmployeeModel employee = new EmployeeModel
                 {
-                    ID = new Guid().ToString(),
+                    ID = Guid.NewGuid().ToString(),
                     Status = EmployeeStatusType.Free,
                     Type = EmployeeType.Simple
                 };
@@ -34,7 +34,7 @@ namespace TechnicalSupportService.Entities
 
             EmployeeModel employeeMng = new EmployeeModel
             {
-                ID = new Guid().ToString(),
+                ID = Guid.NewGuid().ToString(),
                 Status = EmployeeStatusType.Free,
                 Type = EmployeeType.Simple
             };
@@ -42,7 +42,7 @@ namespace TechnicalSupportService.Entities
 
             EmployeeModel employeeDrct = new EmployeeModel
             {
-                ID = new Guid().ToString(),
+                ID = Guid.NewGuid().ToString(),
                 Status = EmployeeStatusType.Free,
                 Type = EmployeeType.Simple
             };
