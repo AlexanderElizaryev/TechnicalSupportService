@@ -69,7 +69,7 @@ namespace TechnicalSupportService.Entities
             if (!_requestDict.TryGetValue(requestID, out var removeRequestModel))
                 return false;
 
-            if (removeRequestModel.Status == RequestStatusType.Involved)
+            if (removeRequestModel.Status != RequestStatusType.Involved)
                 return false;
 
             if (!_requestDict.TryRemove(requestID, out removeRequestModel))
