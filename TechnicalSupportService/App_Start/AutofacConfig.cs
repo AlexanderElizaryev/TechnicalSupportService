@@ -31,8 +31,8 @@ namespace TechnicalSupportService.App_Start
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
-            builder.Register(x => new RequestOperations()).As<IRequestOperations>().SingleInstance();
-            builder.Register(x => new QueueRequestsHandler()).As<IQueueRequestsHandler>().SingleInstance();
+            builder.RegisterType<QueueRequestsHandler>().As<IQueueRequestsHandler>().SingleInstance();
+            builder.RegisterType<RequestOperations>().As<IRequestOperations>().SingleInstance();
         }
     }
 }

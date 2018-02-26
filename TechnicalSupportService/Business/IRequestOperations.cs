@@ -12,6 +12,5 @@ namespace TechnicalSupportService.Business
 
         RequestStatusType? GetStatusRequest(string id);
 
-        void RunRequest(string employeeID, string requestID);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Configuration;
 using System.Linq;
 using System.Threading;
 using TechnicalSupportService.Enums;
@@ -15,10 +16,15 @@ namespace TechnicalSupportService.Entities
         private static int _countRequest = 0;
         public int CountRequest => _countRequest;
 
+        private readonly int _beginSpanSec;
+        private readonly int _endSpanSec;
+        readonly Random _random = new Random();
+
         private Requests()
         {
             //TODO read DB History values
-            //RequestDict
+            _beginSpanSec = int.Parse(ConfigurationManager.AppSettings["BeginSpanSec"]);
+            _endSpanSec = int.Parse(ConfigurationManager.AppSettings["EndSpanSec"]);
 
         }
 
@@ -112,6 +118,17 @@ namespace TechnicalSupportService.Entities
             return _requestDict
                 .Where(w => w.Value.Status == RequestStatusType.NotProcessed && w.Value.StoreTime == maxStoreTime)
                 .Select(s => s.Value).FirstOrDefault();
+        }
+
+        public void RunRequest(string employeeID, string requestID)
+        {
+            int waitSec = _random.Next(_beginSpanSec, _endSpanSec);
+            Thread.Sleep(waitSec * 1000);
+
+            //TODO: write in History
+
+            Employees.Instance.ChangeStatus(employeeID, EmployeeStatusType.Free);
+            Requests.Instance.Remove(requestID);
         }
     }
 }

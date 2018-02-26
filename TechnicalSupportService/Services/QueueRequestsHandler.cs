@@ -1,7 +1,6 @@
 ﻿using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
-using TechnicalSupportService.Business;
 using TechnicalSupportService.Entities;
 using TechnicalSupportService.Enums;
 
@@ -12,14 +11,10 @@ namespace TechnicalSupportService.Services
         private int TdMin;
         private int TmMin;
 
-        private readonly IRequestOperations _requestOperations;
-
-        public QueueRequestsHandler(IRequestOperations requestOperations)
+        public QueueRequestsHandler()
         {
             TdMin = int.Parse(ConfigurationManager.AppSettings["TdMin"]);
             TmMin = int.Parse(ConfigurationManager.AppSettings["TmMin"]);
-
-            _requestOperations = requestOperations;
         }
 
         private int _work = 0;
@@ -35,7 +30,7 @@ namespace TechnicalSupportService.Services
         {
             while (Requests.Instance.CountRequest > 0)
             {
-                Task.Run( async () => await DoOperationBody(TdMin, EmployeeType.Director));
+                Task.Run(async () => await DoOperationBody(TdMin, EmployeeType.Director));
                 Task.Run(async () => await DoOperationBody(TmMin, EmployeeType.Manager));
                 Task.Run(async () => await DoOperationBody(null, EmployeeType.Simple));
             }
@@ -54,7 +49,7 @@ namespace TechnicalSupportService.Services
             if (!Employees.Instance.ChangeStatus(employee.ID, EmployeeStatusType.Work)) return null;
             if (Requests.Instance.ChangeStatus(tdRequestModel.ID, RequestStatusType.Involved))
             {
-                _requestOperations.RunRequest(employee.ID, tdRequestModel.ID);
+                Requests.Instance.RunRequest(employee.ID, tdRequestModel.ID);
             }
             else
             {

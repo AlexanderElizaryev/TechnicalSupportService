@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Configuration;
-using System.Threading;
 using TechnicalSupportService.Entities;
 using TechnicalSupportService.Enums;
 using TechnicalSupportService.Models;
@@ -10,18 +8,11 @@ namespace TechnicalSupportService.Business
 {
     public class RequestOperations: IRequestOperations
     {
-        private readonly int _beginSpanSec;
-        private readonly int _endSpanSec;
-        readonly Random _random = new Random();
-
         private readonly IQueueRequestsHandler _queueRequestsHandler ;
 
         public RequestOperations(IQueueRequestsHandler queueRequestsHandler)
         {
             _queueRequestsHandler = queueRequestsHandler;
-
-            _beginSpanSec = int.Parse(ConfigurationManager.AppSettings["BeginSpanSec"]);
-            _endSpanSec = int.Parse(ConfigurationManager.AppSettings["EndSpanSec"]);
         }
 
         public bool AddRequest(string id)
@@ -53,7 +44,7 @@ namespace TechnicalSupportService.Business
             bool successChangeStatus = Requests.Instance.ChangeStatus(id, RequestStatusType.Involved);
             if (successChangeStatus)
             {
-                RunRequest(freeEmployee.ID, newRequestModel.ID);
+                Requests.Instance.RunRequest(freeEmployee.ID, newRequestModel.ID);
             }
             else
             {
@@ -77,17 +68,6 @@ namespace TechnicalSupportService.Business
         {
             var requestModel = Requests.Instance.GetRequestModel(id);
             return requestModel?.Status;
-        }
-
-        public void RunRequest(string employeeID, string requestID)
-        {
-            int waitSec = _random.Next(_beginSpanSec, _endSpanSec);
-            Thread.Sleep(waitSec * 1000);
-
-            //TODO: write in History
-
-            Employees.Instance.ChangeStatus(employeeID, EmployeeStatusType.Free);
-            Requests.Instance.Remove(requestID);
         }
     }
 }
