@@ -116,7 +116,7 @@ namespace TechnicalSupportService.Entities
                 Status = status
             };
 
-            if (!_emplDict.TryUpdate(employeeID, changeEmployeeModel, newEmployeeModel))
+            if (!_emplDict.TryUpdate(employeeID, newEmployeeModel, changeEmployeeModel ))
                 return false;
             
             if (changeEmployeeModel.Status == EmployeeStatusType.Work && status == EmployeeStatusType.Free)

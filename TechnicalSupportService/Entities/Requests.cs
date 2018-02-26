@@ -98,7 +98,7 @@ namespace TechnicalSupportService.Entities
                 Status = status
             };
 
-            return _requestDict.TryUpdate(requestID, changeRequestModel, newRequestModel);
+            return _requestDict.TryUpdate(requestID, newRequestModel, changeRequestModel);
             //TODO async write in DB
         }
 
