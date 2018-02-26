@@ -17,9 +17,7 @@ namespace TechnicalSupportService.Entities
 
         private Employees()
         {
-            //TODO read DB History values
-            //set _emplDict
-
+            //TODO: read DB employees to _emplDict
             for (int i = 0; i < 10; i++)
             {
                 EmployeeModel employee = new EmployeeModel

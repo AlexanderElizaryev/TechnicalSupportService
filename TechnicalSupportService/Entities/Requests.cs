@@ -24,7 +24,7 @@ namespace TechnicalSupportService.Entities
 
         private Requests()
         {
-            //TODO read DB History values
+            //TODO read DB History to _requestDict
             _beginSpanSec = int.Parse(ConfigurationManager.AppSettings["BeginSpanSec"]);
             _endSpanSec = int.Parse(ConfigurationManager.AppSettings["EndSpanSec"]);
 
