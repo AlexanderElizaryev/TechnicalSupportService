@@ -1,41 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
+﻿using System.Web.Http;
+using TechnicalSupportService.Business;
 
 namespace TechnicalSupportService.Controllers
 {
+    [RoutePrefix("api/operation")]
     public class OperationController : ApiController
     {
-        // GET api/<controller>
-        public IEnumerable<string> Get()
+        private readonly IRequestOperations _requestOperations;
+
+        public OperationController(IRequestOperations requestOperations)
         {
-            return new string[] { "value1", "value2" };
+            _requestOperations = requestOperations;
         }
 
-        // GET api/<controller>/5
-        public string GetStatusRequest(int id)
+        [HttpGet]
+        [Route("{id}/status")]
+        public string GetStatusRequest(string id)
         {
-            return $"value:{id}";
+            return _requestOperations.GetStatusRequest(id).ToString();
         }
 
-        // POST api/<controller>
-        public void Post([FromBody]string value)
+        [HttpGet]
+        [Route("count")]
+        public int GetCountRequest()
         {
+            return _requestOperations.GetCountRequest();
         }
 
-        // PUT api/<controller>/5
-        public string AddRequest(int id, [FromBody]string value)
+        [Route("{id}")]
+        [HttpPut]
+        public bool AddRequest(string id)
         {
-            return $"add request:{id}";
+            
+
+            return _requestOperations.AddRequest(id);
         }
 
-        // DELETE api/<controller>/5
-        public string RemoveRequest(int id)
+        [Route("{id}")]
+        [HttpDelete]
+        public bool RemoveRequest(string id)
         {
-            return $"remove request:{id}";
+            return _requestOperations.RemoveRequest(id);
         }
     }
 }
