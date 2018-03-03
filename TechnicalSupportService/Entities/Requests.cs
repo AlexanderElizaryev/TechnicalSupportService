@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading;
 using TechnicalSupportService.Enums;
 using TechnicalSupportService.Models;
+using TechnicalSupportService.Repository.Context;
+using TechnicalSupportService.Repository.DTO;
 
 namespace TechnicalSupportService.Entities
 {
@@ -24,10 +25,21 @@ namespace TechnicalSupportService.Entities
 
         private Requests()
         {
-            //TODO read DB History to _requestDict
             _beginSpanSec = int.Parse(ConfigurationManager.AppSettings["BeginSpanSec"]);
             _endSpanSec = int.Parse(ConfigurationManager.AppSettings["EndSpanSec"]);
 
+            using (var context = new HistoryContext())
+            {
+                foreach (var history in context.Histories.Where(w=> w.RequestStatus == RequestStatusType.NotProcessed))
+                {
+                    var request = new RequestModel
+                    {
+                        ID = history.RequestID,
+                        Status = history.RequestStatus
+                    };
+                    this.Add(request, history.RequestStoreTime);
+                }
+            }
         }
 
         public static Requests Instance
@@ -47,18 +59,26 @@ namespace TechnicalSupportService.Entities
             }
         }
 
-        public bool Add(RequestModel requestModel)
+        public bool Add(RequestModel requestModel, DateTime? requestStoreTime)
         {
             if (_requestDict.ContainsKey(requestModel.ID))
                 return true;
 
             if (!_requestDict.TryAdd(requestModel.ID, requestModel))
                 return false;
-            
-            //TODO async write in DB
-
 
             Interlocked.Increment(ref _countRequest);
+
+            using (var context = new HistoryContext())
+            {
+                context.Histories.Add(new HistoryDTO
+                {
+                    RequestID = requestModel.ID,
+                    RequestStoreTime = requestStoreTime
+                });
+                context.SaveChangesAsync();
+            }
+
             return true;
         }
 
@@ -75,10 +95,19 @@ namespace TechnicalSupportService.Entities
             if (!_requestDict.TryRemove(requestID, out removeRequestModel))
                 return false;
 
-            //TODO async write in DB
-
-
             Interlocked.Decrement(ref _countRequest);
+
+            using (var context = new HistoryContext())
+            {
+                var removeField = context.Histories.FirstOrDefault(w => w.RequestID == requestID);
+                if (removeField != null)
+                {
+                    removeField.Deleted = true;
+                    context.Histories.AddOrUpdate(removeField);
+                    context.SaveChangesAsync();
+                }
+            }
+
             return true;
         }
 
@@ -98,8 +127,22 @@ namespace TechnicalSupportService.Entities
                 Status = status
             };
 
-            return _requestDict.TryUpdate(requestID, newRequestModel, changeRequestModel);
-            //TODO async write in DB
+            var success = _requestDict.TryUpdate(requestID, newRequestModel, changeRequestModel);
+
+            if (!success) return false;
+
+            using (var context = new HistoryContext())
+            {
+                var changeField = context.Histories.FirstOrDefault(w => w.RequestID == requestID);
+                if (changeField != null)
+                {
+                    changeField.RequestStatus = status;
+                    context.Histories.AddOrUpdate(changeField);
+                    context.SaveChangesAsync();
+                }
+            }
+
+            return true;
         }
 
         public RequestModel GetRequestModel(string requestID)
@@ -134,7 +177,18 @@ namespace TechnicalSupportService.Entities
             int waitSec = _random.Next(_beginSpanSec, _endSpanSec);
             Thread.Sleep(waitSec * 1000);
 
-            //TODO: write in History
+            using (var context = new HistoryContext())
+            {
+                var changeField = context.Histories.FirstOrDefault(w => w.RequestID == requestID);
+                if (changeField != null)
+                {
+                    changeField.RequestStatus = RequestStatusType.Processed;
+                    changeField.Deleted = true;
+                    changeField.OperationTime = waitSec;
+                    context.Histories.AddOrUpdate(changeField);
+                    context.SaveChangesAsync();
+                }
+            }
 
             Employees.Instance.ChangeStatus(employeeID, EmployeeStatusType.Free);
             Requests.Instance.Remove(requestID);

@@ -3,7 +3,8 @@
     public enum RequestStatusType
     {
         NotProcessed,
-        Involved
+        Involved,
+        Processed
     }
 
 }

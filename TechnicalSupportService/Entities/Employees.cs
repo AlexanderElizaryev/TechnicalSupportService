@@ -1,9 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Threading;
+using AutoMapper;
 using TechnicalSupportService.Enums;
 using TechnicalSupportService.Models;
+using TechnicalSupportService.Repository.Context;
+using TechnicalSupportService.Repository.DTO;
 
 namespace TechnicalSupportService.Entities
 {
@@ -17,35 +20,14 @@ namespace TechnicalSupportService.Entities
 
         private Employees()
         {
-            //TODO: read DB employees to _emplDict
-            for (int i = 0; i < 10; i++)
+            using (var context = new EmployeeContext())
             {
-                EmployeeModel employee = new EmployeeModel
+                foreach (var employee in context.Employees)
                 {
-                    ID = Guid.NewGuid().ToString(),
-                    Status = EmployeeStatusType.Free,
-                    Type = EmployeeType.Simple
-                };
-
-                _emplDict.TryAdd(employee.ID, employee);
+                    var empl = Mapper.Map<EmployeeModel>(employee);
+                    this.Add(empl);
+                }
             }
-
-            EmployeeModel employeeMng = new EmployeeModel
-            {
-                ID = Guid.NewGuid().ToString(),
-                Status = EmployeeStatusType.Free,
-                Type = EmployeeType.Simple
-            };
-            _emplDict.TryAdd(employeeMng.ID, employeeMng);
-
-            EmployeeModel employeeDrct = new EmployeeModel
-            {
-                ID = Guid.NewGuid().ToString(),
-                Status = EmployeeStatusType.Free,
-                Type = EmployeeType.Simple
-            };
-            _emplDict.TryAdd(employeeDrct.ID, employeeDrct);
-
         }
 
         public static Employees Instance
@@ -73,10 +55,15 @@ namespace TechnicalSupportService.Entities
             if (!_emplDict.TryAdd(employeeModel.ID, employeeModel))
                 return false;
 
-            //TODO async write in DB
-
-
             Interlocked.Increment(ref _countFreeEmployees);
+
+            using (EmployeeContext employeeContext = new EmployeeContext())
+            {
+                var emplDTO = Mapper.Map<EmployeeDTO>(employeeModel);
+                employeeContext.Employees.Add(emplDTO);
+                employeeContext.SaveChangesAsync();
+            }
+
             return true;
         }
 
@@ -95,8 +82,12 @@ namespace TechnicalSupportService.Entities
             if (removeEmployeeModel.Status == EmployeeStatusType.Free)
                 Interlocked.Decrement(ref _countFreeEmployees);
 
-            //TODO async write in DB
-
+            using (EmployeeContext employeeContext = new EmployeeContext())
+            {
+                var emplDTO = Mapper.Map<EmployeeDTO>(removeEmployeeModel);
+                employeeContext.Employees.Remove(emplDTO);
+                employeeContext.SaveChangesAsync();
+            }
             return true;
         }
 
@@ -128,7 +119,12 @@ namespace TechnicalSupportService.Entities
                 Interlocked.Decrement(ref _countFreeEmployees);
             }
 
-            //TODO async write in DB
+            using (EmployeeContext employeeContext = new EmployeeContext())
+            {
+                var emplDTO = Mapper.Map<EmployeeDTO>(newEmployeeModel);
+                employeeContext.Employees.AddOrUpdate(emplDTO);
+                employeeContext.SaveChangesAsync();
+            }
 
             return true;
         }

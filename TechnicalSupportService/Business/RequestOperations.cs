@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Data.Entity.Migrations;
+using System.Linq;
 using TechnicalSupportService.Entities;
 using TechnicalSupportService.Enums;
 using TechnicalSupportService.Models;
+using TechnicalSupportService.Repository.Context;
 using TechnicalSupportService.Services;
 
 namespace TechnicalSupportService.Business
@@ -24,8 +27,7 @@ namespace TechnicalSupportService.Business
                 Status = RequestStatusType.NotProcessed
             };
 
-            bool successAdd = Requests.Instance.Add(newRequestModel);
-            //TODO: add HISTORY
+            bool successAdd = Requests.Instance.Add(newRequestModel, DateTime.Now);
 
             var freeEmployee = Employees.Instance.GetFreeEmployee(EmployeeType.Simple);
             if (freeEmployee == null)
@@ -35,6 +37,11 @@ namespace TechnicalSupportService.Business
                     _queueRequestsHandler.Start();    
                 }
                 return successAdd;
+            }
+
+            using (var context = new HistoryContext())
+            {
+                context.SetEmpployee(id, freeEmployee.ID);
             }
 
             var status = this.GetStatusRequest(id);

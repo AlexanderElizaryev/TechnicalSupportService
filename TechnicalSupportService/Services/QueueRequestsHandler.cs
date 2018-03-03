@@ -1,8 +1,10 @@
 ﻿using System.Configuration;
+using System.Data.Entity.Migrations;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using TechnicalSupportService.Entities;
 using TechnicalSupportService.Enums;
+using TechnicalSupportService.Repository.Context;
 
 namespace TechnicalSupportService.Services
 {
@@ -47,6 +49,12 @@ namespace TechnicalSupportService.Services
             if (employee == null) return;
 
             if (!Employees.Instance.ChangeStatus(employee.ID, EmployeeStatusType.Work)) return;
+
+            using (var context = new HistoryContext())
+            {
+                context.SetEmpployee(tdRequestModel.ID, employee.ID);
+            }
+
             if (Requests.Instance.ChangeStatus(tdRequestModel.ID, RequestStatusType.Involved))
             {
                 Requests.Instance.RunRequest(employee.ID, tdRequestModel.ID);
@@ -55,7 +63,6 @@ namespace TechnicalSupportService.Services
             {
                 Employees.Instance.ChangeStatus(employee.ID, EmployeeStatusType.Free);
             }
-            return;
         }
     }
 }
