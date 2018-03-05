@@ -1,0 +1,43 @@
+﻿@model TechnicalSupportService.Areas.Config.Models.ConfigModel
+
+
+@{
+    ViewBag.Title = "Gonfiguration";
+}
+
+
+<h2>Gonfiguration service</h2>
+
+
+<div class="row">
+    @Html.BeginForm("Index", "Config", FormMethod.Post, new { @class = "col s12"})
+    @{
+        <div class="row">
+           <div class="input-field col s3">
+               
+
+               @Html.TextBox("TdMin", "", new {@class = "validate"})
+                <label for="TdMin">Td min</label>
+            </div>
+        
+           <div class="input-field col s3">
+                <input id="TmMin" type="text" class="validate">
+                <label for="TmMin">Tm min</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s3">
+                <input id="BeginSpanSec" type="text" class="validate">
+                <label for="BeginSpanSec">Begin Span Sec</label>
+            </div>
+        
+            <div class="input-field col s3">
+                <input id="EndSpanSec" type="text" class="validate">
+                <label for="EndSpanSec">End Span Sec</label>
+            </div>
+        </div>
+        <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+            <i class="material-icons right">send</i>
+        </button>
+    }
+</div>

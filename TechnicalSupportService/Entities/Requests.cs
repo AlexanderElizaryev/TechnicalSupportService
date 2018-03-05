@@ -19,15 +19,12 @@ namespace TechnicalSupportService.Entities
         private static int _countRequest = 0;
         public int CountRequest => _countRequest;
 
-        private readonly int _beginSpanSec;
-        private readonly int _endSpanSec;
+        private static int _beginSpanSec;
+        private static int _endSpanSec;
         readonly Random _random = new Random();
 
         private Requests()
         {
-            _beginSpanSec = int.Parse(ConfigurationManager.AppSettings["BeginSpanSec"]);
-            _endSpanSec = int.Parse(ConfigurationManager.AppSettings["EndSpanSec"]);
-
             using (var context = new HistoryContext())
             {
                 foreach (var history in context.Histories.Where(w=> w.RequestStatus == RequestStatusType.NotProcessed))
@@ -53,10 +50,18 @@ namespace TechnicalSupportService.Entities
                     if (_instance == null)
                     {
                         _instance = new Requests();
+                        _beginSpanSec = int.Parse(ConfigurationManager.AppSettings["BeginSpanSec"]);
+                        _endSpanSec = int.Parse(ConfigurationManager.AppSettings["EndSpanSec"]);
                     }
                 }
                 return _instance;
             }
+        }
+
+        public static void ChangeParameters(int newBeginSpanSec, int newEndSpanSec)
+        {
+            Interlocked.Exchange(ref _beginSpanSec, newBeginSpanSec);
+            Interlocked.Exchange(ref _endSpanSec, newEndSpanSec);
         }
 
         public bool Add(RequestModel requestModel, DateTime? requestStoreTime)
@@ -183,7 +188,6 @@ namespace TechnicalSupportService.Entities
                 if (changeField != null)
                 {
                     changeField.RequestStatus = RequestStatusType.Processed;
-                    changeField.Deleted = true;
                     changeField.OperationTime = waitSec;
                     context.Histories.AddOrUpdate(changeField);
                     context.SaveChangesAsync();

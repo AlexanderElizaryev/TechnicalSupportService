@@ -31,8 +31,6 @@ namespace TechnicalSupportService.Controllers
         [HttpPut]
         public bool AddRequest(string id)
         {
-            
-
             return _requestOperations.AddRequest(id);
         }
 

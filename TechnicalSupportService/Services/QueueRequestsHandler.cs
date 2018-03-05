@@ -1,6 +1,4 @@
 ﻿using System.Configuration;
-using System.Data.Entity.Migrations;
-using System.Linq;
 using System.Threading;
 using TechnicalSupportService.Entities;
 using TechnicalSupportService.Enums;
@@ -10,13 +8,19 @@ namespace TechnicalSupportService.Services
 {
     public class QueueRequestsHandler: IQueueRequestsHandler
     {
-        private int TdMin;
-        private int TmMin;
+        private static int TdMin;
+        private static int TmMin;
 
-        public QueueRequestsHandler()
+        static QueueRequestsHandler()
         {
             TdMin = int.Parse(ConfigurationManager.AppSettings["TdMin"]);
             TmMin = int.Parse(ConfigurationManager.AppSettings["TmMin"]);
+        }
+
+        public static void ChangeParameters(int newTdMin, int newTmMin)
+        {
+            Interlocked.Exchange(ref TdMin, newTdMin);
+            Interlocked.Exchange(ref TmMin, newTmMin);
         }
 
         private int _work = 0;

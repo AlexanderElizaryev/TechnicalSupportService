@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Data.Entity.Migrations;
-using System.Linq;
 using TechnicalSupportService.Entities;
 using TechnicalSupportService.Enums;
 using TechnicalSupportService.Models;

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using TechnicalSupportService.Areas;
 
-namespace TechnicalSupportService.App_Start
+namespace TechnicalSupportService
 {
     public class AutomapperConfig
     {

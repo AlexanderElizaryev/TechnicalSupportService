@@ -5,7 +5,7 @@ using Autofac.Integration.WebApi;
 using TechnicalSupportService.Business;
 using TechnicalSupportService.Services;
 
-namespace TechnicalSupportService.App_Start
+namespace TechnicalSupportService
 {
     public class AutofacConfig
     {
